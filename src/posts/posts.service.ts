@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
-const { Post } = require("../../database/models");
+// const { Post } = require("../../database/models");
 
 @Injectable()
 export class PostsService {
@@ -10,15 +10,16 @@ export class PostsService {
     }
 
     async findAll() {
-        try {
-            const allPosts = await Post.findAll({
-                order: [["createdAt", "DESC"]]
-            });
-            return allPosts;
-        } catch (error) {
-            console.log(error);
-            throw new Error("Failed to fetch posts");
-        }
+        // try {
+        //     const allPosts = await Post.findAll({
+        //         order: [["createdAt", "DESC"]]
+        //     });
+        //     return allPosts;
+        // } catch (error) {
+        //     console.log(error);
+        //     throw new Error("Failed to fetch posts");
+        // }
+        return "all Posts";
     }
 
     findOne(id: number) {
