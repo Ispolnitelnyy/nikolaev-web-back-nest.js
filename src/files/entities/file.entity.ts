@@ -1,4 +1,3 @@
-import { UserEntity } from "src/users/entities/user.entity";
 import {
     Column,
     DeleteDateColumn,
@@ -6,9 +5,14 @@ import {
     ManyToOne,
     PrimaryGeneratedColumn
 } from "typeorm";
+import { UserEntity } from "../../users/entities/user.entity";
 
-@Entity("files")
+export enum FileType {
+    PHOTOS = "photos",
+    TRASH = "trash"
+}
 // декоратор для соебинения с БД
+@Entity("files")
 export class FileEntity {
     @PrimaryGeneratedColumn()
     id: number;
@@ -17,18 +21,17 @@ export class FileEntity {
     filename: string;
 
     @Column()
-    originalname: string;
+    originalName: string;
 
     @Column()
-    size: string;
+    size: number;
 
     @Column()
     mimetype: string;
-
     // много файлов могут быть от одного юзера
     @ManyToOne(() => UserEntity, (user) => user.files)
     user: UserEntity;
 
     @DeleteDateColumn()
-    deletedAt: Date;
+    deletedAt?: Date;
 }

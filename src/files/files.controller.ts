@@ -1,38 +1,33 @@
 import {
     Controller,
-    Get,
     Post,
     UseInterceptors,
     UploadedFile,
     ParseFilePipe,
     MaxFileSizeValidator,
+    Get,
     UseGuards,
-    NotFoundException,
-    Param
+    Query,
+    Delete
 } from "@nestjs/common";
 import { FilesService } from "./files.service";
-import { ApiBody, ApiConsumes, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { fileStorage } from "./storage";
-// import { JwtAuthGuard } from "src/auth/guards/jwt.guard";
+import { JwtAuthGuard } from "../auth/guards/jwt.guard";
+import { UserId } from "../decorators/user-id.decorator";
+import { FileType } from "./entities/file.entity";
 
 @Controller("files")
-@ApiTags("files") // для свагера
-// @UseGuards(JwtAuthGuard) // доступ к контроллеру по jwt
+@ApiTags("files")
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class FilesController {
     constructor(private readonly filesService: FilesService) {}
 
-    @Get("/all")
-    findAll() {
-        return this.filesService.findAll();
-    }
-    @Get("/:id")
-    async findById(@Param("id") id: number) {
-        const file = await this.filesService.findById(id);
-        if (!file) {
-            throw new NotFoundException(`File with id ${id} not found`);
-        }
-        return file;
+    @Get()
+    findAll(@UserId() userId: number, @Query("type") fileType: FileType) {
+        return this.filesService.findAll(userId, fileType);
     }
 
     @Post()
@@ -41,9 +36,8 @@ export class FilesController {
             storage: fileStorage
         })
     )
-    @ApiConsumes("multipart/form-data") // отвечает за тип запроса
+    @ApiConsumes("multipart/form-data")
     @ApiBody({
-        // настраивает схему для свагера
         schema: {
             type: "object",
             properties: {
@@ -62,8 +56,14 @@ export class FilesController {
                 ]
             })
         )
-        file: Express.Multer.File
+        file: Express.Multer.File,
+        @UserId() userId: number
     ) {
-        return file;
+        return this.filesService.create(file, userId);
+    }
+
+    @Delete()
+    remove(@UserId() userId: number, @Query("ids") ids: string) {
+        return this.filesService.remove(userId, ids);
     }
 }
